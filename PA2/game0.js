@@ -104,12 +104,12 @@ The user moves a cube around the board trying to knock balls into a cone
 
 			npc = createBoxMesh2(0x0000ff,1,2,4);
 			npc.position.set(30,5,-30);
-     		npc.addEventListener('collision',function(other_object){
-        	if (other_object==avatar){
-          		gameState.health--;
-           		controls.reset = true;
-           		updateAvatar();
-        	}
+			npc.addEventListener('collision',function(other_object){
+				if (other_object==avatar){
+					gameState.health--;
+					controls.reset = true;
+					updateAvatar();
+				}
 
 
 			//playGameMusic();
