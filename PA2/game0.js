@@ -54,6 +54,20 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	}
 
+	var startScene, startText, startCamera;
+	function createStartScene(){
+		startScene = initScene();
+		startText = createSkyBox('startscreen.png',8);
+		startScene.add(startText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		startScene.add(light1);
+		startCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		startCamera.position.set(0,50,1);
+		startCamera.lookAt(0,0,0);
+		gameState.scene = 'startscreen';
+	}
+
 	/**
 	  To initialize the scene, we initialize each of its components
 	  */
@@ -63,6 +77,7 @@ The user moves a cube around the board trying to knock balls into a cone
 	  	createEndScene();
 	  	initRenderer();
 	  	createMainScene();
+	  	createStartScene();
 	  }
 
 
@@ -110,10 +125,7 @@ The user moves a cube around the board trying to knock balls into a cone
 					controls.reset = true;
 					updateAvatar();
 				}
-
-
-			//playGameMusic();
-
+			})
 		}
 
 
@@ -354,6 +366,12 @@ The user moves a cube around the board trying to knock balls into a cone
 			return;
 		}
 
+		if (gameState.scene == 'startscreen' && event.key=='p') {
+			gameState.scene = 'main';
+			gameState.score = 0;
+			return;
+		}
+
 		// this is the regular scene
 		switch (event.key){
 			// change the way the avatar is moving
@@ -441,6 +459,11 @@ The user moves a cube around the board trying to knock balls into a cone
 		requestAnimationFrame( animate );
 
 		switch(gameState.scene) {
+
+			case "startscreen":
+			startText.rotateY(0.005);
+			renderer.render( startScene, startCamera );
+			break;
 
 			case "youwon":
 			endText.rotateY(0.005);
