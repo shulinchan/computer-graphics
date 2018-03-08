@@ -129,6 +129,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			})
 		}
 
+		scene.add(npc);
 
 		function randN(n){
 			return Math.random()*n;
