@@ -15,6 +15,7 @@ The user moves a cube around the board trying to knock balls into a cone
 	// here are some mesh objects ...
 
 	var cone;
+
 	var npc;
 
 
@@ -119,7 +120,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			scene.add(cone);
 
 			npc = createBoxMesh2(0x0000ff,1,2,4);
-			npc.position.set(30,5,-30);
+			npc.position.set(10,20,7);
 			npc.addEventListener('collision',function(other_object){
 				if (other_object==avatar){
 					gameState.health--;
@@ -127,9 +128,11 @@ The user moves a cube around the board trying to knock balls into a cone
 					updateAvatar();
 				}
 			})
+
+			scene.add(npc);
 		}
 
-		scene.add(npc);
+
 
 		function randN(n){
 			return Math.random()*n;
@@ -470,7 +473,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	function updateNPC(){
 		npc.lookAt(avatar.position);
-	  npc.__dirtyPosition = true;
+	  // npc.__dirtyPosition = true;
 		if (distanceVector(avatar, npc) < 10){
 			npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(2));
 		}
