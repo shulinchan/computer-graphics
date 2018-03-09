@@ -17,7 +17,8 @@ The user moves a cube around the board trying to knock balls into a cone
 	var cone;
 
 	var npc;
-
+	var removedBalls;
+	var totalBalls;
 
 	var endScene, endCamera, endText;
 
@@ -35,12 +36,9 @@ The user moves a cube around the board trying to knock balls into a cone
 
 
 	// Here is the main game control
-  init(); //
-  initControls();
+    init(); //
+    initControls();
 	animate();  // start the animation loop!
-
-
-
 
 	function createEndScene(){
 		endScene = initScene();
@@ -70,6 +68,19 @@ The user moves a cube around the board trying to knock balls into a cone
 		gameState.scene = 'startscreen';
 	}
 
+	var loseScene, loseText, loseCamera;
+	function createLoseScene(){
+		loseScene = initScene();
+		loseText = createSkyBox('losescreen.png',8);
+		loseScene.add(loseText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		loseScene.add(light1);
+		loseCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		loseCamera.position.set(0,50,1);
+		loseCamera.lookAt(0,0,0);
+	}
+
 	/**
 	  To initialize the scene, we initialize each of its components
 	  */
@@ -79,17 +90,18 @@ The user moves a cube around the board trying to knock balls into a cone
 	  	createEndScene();
 	  	initRenderer();
 	  	createMainScene();
+	  	createLoseScene();
 	  	createStartScene();
 	  }
 
 
 	  function createMainScene(){
-      // setup lighting
-      var light1 = createPointLight();
-      light1.position.set(0,200,20);
-      scene.add(light1);
-      var light0 = new THREE.AmbientLight( 0xffffff,0.25);
-      scene.add(light0);
+	      // setup lighting
+	      var light1 = createPointLight();
+	      light1.position.set(0,200,20);
+	      scene.add(light1);
+	      var light0 = new THREE.AmbientLight( 0xffffff,0.25);
+	      scene.add(light0);
 
 			// create main camera
 			camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -113,7 +125,9 @@ The user moves a cube around the board trying to knock balls into a cone
 			scene.add(avatar);
 			gameState.camera = avatarCam;
 
-			addBalls();
+			removedBalls = 0;
+			totalBalls = 2;
+			addBalls(totalBalls);
 
 			cone = createConeMesh(4,6);
 			cone.position.set(10,3,7);
@@ -126,6 +140,10 @@ The user moves a cube around the board trying to knock balls into a cone
 					gameState.health--;
 					controls.reset = true;
 					updateAvatar();
+				}
+
+				if(gameState.health == 0){
+					gameState.scene = 'lose';
 				}
 			})
 
@@ -146,10 +164,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			return Math.sqrt( dx * dx + dy * dy + dz * dz );
 		}
 
-		function addBalls(){
-			var numBalls = 2
-
-
+		function addBalls(numBalls){
 			for(i=0;i<numBalls;i++){
 				var ball = createBall();
 				ball.position.set(randN(20)+15,30,randN(20)+15);
@@ -160,16 +175,18 @@ The user moves a cube around the board trying to knock balls into a cone
 						if (other_object==cone){
 							console.log("ball "+i+" hit the cone");
 							soundEffect('good.wav');
-						gameState.score += 1;  // add one to the score
-						if (gameState.score==numBalls) {
+							gameState.score += 1;  // add one to the score
+							removedBalls+= 1;
+					
+						if (gameState.score==totalBalls) {
 							gameState.scene='youwon';
 						}
 						// make the ball drop below the scene ..
 						// threejs doesn't let us remove it from the schene...
 						this.position.y = this.position.y - 100;
 						this.__dirtyPosition = true;
+						}
 					}
-				}
 				)
 			}
 		}
@@ -256,9 +273,9 @@ The user moves a cube around the board trying to knock balls into a cone
 		var geometry = new THREE.BoxGeometry( 1, 1, 1);
 		var material = new THREE.MeshLambertMaterial( { color: color} );
 		mesh = new Physijs.BoxMesh( geometry, material );
-    //mesh = new Physijs.BoxMesh( geometry, material,0 );
-    mesh.castShadow = true;
-    return mesh;
+    	//mesh = new Physijs.BoxMesh( geometry, material,0 );
+    	mesh.castShadow = true;
+    	return mesh;
   }
 
 	function createBoxMesh2(color,w,h,d){
@@ -381,7 +398,18 @@ The user moves a cube around the board trying to knock balls into a cone
 		if (gameState.scene == 'youwon' && event.key=='r') {
 			gameState.scene = 'main';
 			gameState.score = 0;
-			addBalls();
+			gameState.health = 10;
+			addBalls(removedBalls);
+			removedBalls = 0;
+			return;
+		}
+
+		if (gameState.scene == 'lose' && event.key=='r') {
+			gameState.scene = 'main';
+			gameState.score = 0;
+			gameState.health = 10;
+			addBalls(removedBalls);
+			removedBalls = 0;
 			return;
 		}
 
@@ -494,6 +522,11 @@ The user moves a cube around the board trying to knock balls into a cone
 			renderer.render( startScene, startCamera );
 			break;
 
+			case "lose":
+			loseText.rotateY(0.005);
+			renderer.render( loseScene, loseCamera );
+			break;
+
 			case "youwon":
 			endText.rotateY(0.005);
 			renderer.render( endScene, endCamera );
@@ -517,7 +550,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		var info = document.getElementById("info");
 		info.innerHTML='<div style="font-size:24pt">Score: '
 		+ gameState.score
-    	+ " health=" + gameState.health
+    	+ ' health: ' + gameState.health
 			+ '</div>';
 
 	}
