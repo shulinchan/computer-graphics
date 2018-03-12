@@ -24,18 +24,16 @@ The user moves a cube around the board trying to knock balls into a cone
 	var endScene, endCamera, endText;
 
 
-	var controls =
-	{fwd:false, bwd:false, left:false, right:false,
+	var controls = {fwd:false, bwd:false, left:false, right:false,
 		speed:10, fly:false, reset:false,
 		camera:camera}
 
-		var gameState =
-		{score:0, health:10, scene:'main', camera:'none' }
+	var gameState = {score:0, health:10, scene:'main', camera:'none' }
 
 
 	// Here is the main game control
-    init(); //
-    initControls();
+  init(); //
+  initControls();
 	animate();  // start the animation loop!
 
 	function createEndScene(){
@@ -79,121 +77,121 @@ The user moves a cube around the board trying to knock balls into a cone
 		loseCamera.lookAt(0,0,0);
 	}
 
-	/**
-	  To initialize the scene, we initialize each of its components
-	  */
-	  function init(){
-	  	initPhysijs();
-	  	scene = initScene();
-	  	createEndScene();
-	  	initRenderer();
-	  	createMainScene();
-	  	createLoseScene();
-	  	createStartScene();
-	  }
+/**
+  To initialize the scene, we initialize each of its components
+  */
+  function init(){
+  	initPhysijs();
+  	scene = initScene();
+  	createEndScene();
+  	initRenderer();
+  	createMainScene();
+  	createLoseScene();
+  	createStartScene();
+  }
 
+  function createMainScene(){
+    // setup lighting
+    var light1 = createPointLight();
+    light1.position.set(0,200,20);
+    scene.add(light1);
+    var light0 = new THREE.AmbientLight( 0xffffff,0.25);
+    scene.add(light0);
 
-	  function createMainScene(){
-	      // setup lighting
-	      var light1 = createPointLight();
-	      light1.position.set(0,200,20);
-	      scene.add(light1);
-	      var light0 = new THREE.AmbientLight( 0xffffff,0.25);
-	      scene.add(light0);
+		// create main camera
+		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		camera.position.set(0,50,0);
+		camera.lookAt(0,0,0);
 
-			// create main camera
-			camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			camera.position.set(0,50,0);
-			camera.lookAt(0,0,0);
+		// create the ground and the skybox
+		var ground = createGround('grass.png');
+		scene.add(ground);
+		var skybox = createSkyBox('sky.jpg',1);
+		scene.add(skybox);
 
+		// create the avatar
+		avatarCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		avatar = createAvatar();
+		avatar.translateY(20);
+		avatarCam.translateY(-4);
+		avatarCam.translateZ(3);
+		scene.add(avatar);
+		gameState.camera = avatarCam;
 
+		//add balls, everything scales on "totalBalls"
+		totalBalls = 2;
+		magicBalls = 1;
+		removedBalls = 0;
+		removedFakeBalls = 0;
+		removedMagicBalls = 0;
+		addBalls(totalBalls);
+		addFakeBalls(totalBalls * 3);
+		addMagicBalls(magicBalls);
 
-			// create the ground and the skybox
-			var ground = createGround('grass.png');
-			scene.add(ground);
-			var skybox = createSkyBox('sky.jpg',1);
-			scene.add(skybox);
+		cone = createConeMesh(4,6);
+		cone.position.set(10,3,7);
+		scene.add(cone);
 
-			// create the avatar
-			avatarCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			avatar = createAvatar();
-			avatar.translateY(20);
-			avatarCam.translateY(-4);
-			avatarCam.translateZ(3);
-			scene.add(avatar);
-			gameState.camera = avatarCam;
-
-			//add balls, everything scales on "totalBalls"
-			totalBalls = 2;
-			removedBalls = 0;
-			removedFakeBalls = 0;
-			addBalls(totalBalls);
-			addFakeBalls(totalBalls * 3);
-
-			cone = createConeMesh(4,6);
-			cone.position.set(10,3,7);
-			scene.add(cone);
-
-			npc = createBoxMesh2(0x0000ff,1,2,4);
-			npc.position.set(10,20,7);
-			npc.addEventListener('collision',function(other_object){
-				if (other_object==avatar){
-					gameState.health--;
-					controls.reset = true;
-					updateAvatar();
-				}
-
-				if(gameState.health == 0){
-					gameState.scene = 'lose';
-				}
-			})
-
-			scene.add(npc);
-		}
-
-
-
-		function randN(n){
-			return Math.random()*n;
-		}
-
-		function distanceVector( v1, v2 ){
-			var dx = v1.position.x - v2.position.x;
-			var dy = v1.position.y - v2.position.y;
-			var dz = v1.position.z - v2.position.z;
-
-			return Math.sqrt( dx * dx + dy * dy + dz * dz );
-		}
-
-		function addBalls(numBalls){
-			for(i=0;i<numBalls;i++){
-				var ball = createBall(0xffff00);
-				ball.position.set(randN(20)+15,30,randN(20)+15);
-				scene.add(ball);
-
-				ball.addEventListener( 'collision',
-					function( other_object, relative_velocity, relative_rotation, contact_normal ) {
-						if (other_object==cone){
-							console.log("ball "+i+" hit the cone");
-							soundEffect('good.wav');
-							gameState.score += 1;  // add one to the score
-							removedBalls+= 1;
-					
-						if (gameState.score==totalBalls) {
-							gameState.scene='youwon';
-						}
-						// make the ball drop below the scene ..
-						// threejs doesn't let us remove it from the schene...
-						this.position.y = this.position.y - 100;
-						this.__dirtyPosition = true;
-						}
-					}
-				)
+		npc = createBoxMesh2(0x0000ff,1,2,4);
+		npc.position.set(10,20,7);
+		npc.addEventListener('collision',function(other_object){
+			if (other_object==avatar){
+				gameState.health--;
+				controls.reset = true;
+				updateAvatar();
 			}
-		}
 
-	function addFakeBalls(numBalls){
-		for(i=0;i<numBalls;i++){
+			if(gameState.health == 0){
+				gameState.scene = 'lose';
+			}
+		})
+
+		scene.add(npc);
+	}
+
+
+
+	function randN(n){
+		return Math.random()*n;
+	}
+
+	function distanceVector( v1, v2 ){
+		var dx = v1.position.x - v2.position.x;
+		var dy = v1.position.y - v2.position.y;
+		var dz = v1.position.z - v2.position.z;
+
+		return Math.sqrt( dx * dx + dy * dy + dz * dz );
+	}
+
+	function addBalls(numBalls) {
+		for (i=0; i<numBalls; i++) {
+			var ball = createBall(0xffff00);
+			ball.position.set(randN(20)+15,30,randN(20)+15);
+			scene.add(ball);
+
+			ball.addEventListener( 'collision',
+				function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+					if (other_object == cone) {
+						console.log("Regular ball " + i + " hit the cone");
+						soundEffect('good.wav');
+						gameState.score += 1;  // add one to the score
+						removedBalls += 1;
+				
+					if (gameState.score == totalBalls) {
+						gameState.scene = 'youwon';
+					}
+					// make the ball drop below the scene ..
+					// threejs doesn't let us remove it from the schene...
+					this.position.y = this.position.y - 100;
+					this.__dirtyPosition = true;
+					}
+				}
+			)
+		}
+	}
+
+	function addFakeBalls(numBalls) {
+		for(i=0; i<numBalls; i++) {
 			var ball = createBall(0xffff7d);
 			ball.position.set(randN(35)+15,30,randN(35)+15);
 			scene.add(ball);
@@ -201,7 +199,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			ball.addEventListener( 'collision',
 				function( other_object, relative_velocity, relative_rotation, contact_normal ) {
 					if (other_object==cone){
-						console.log("ball "+i+" hit the cone");
+						console.log("Fake ball "+i+" hit the cone");
 						gameState.health -= 1;
 						removedFakeBalls+=1;
 				
@@ -218,6 +216,34 @@ The user moves a cube around the board trying to knock balls into a cone
 			)
 		}
 	}
+
+	function addMagicBalls(numBalls) {
+		for(i=0; i<numBalls; i++) {
+			var ball = createBall(0xffb6c1);
+			ball.position.set(randN(35)+15,30,randN(35)+15);
+			scene.add(ball);
+
+			ball.addEventListener( 'collision',
+				function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+					if (other_object==cone){
+						console.log("Magic ball "+i+" hit the cone");
+						gameState.health += 5;
+						removedMagicBalls+=1;
+				
+						if(gameState.health > totalBalls){
+							gameState.scene = 'youwon';
+						}
+
+						// make the ball drop below the scene ..
+						// threejs doesn't let us remove it from the schene...
+						this.position.y = this.position.y - 100;
+						this.__dirtyPosition = true;
+					}
+				}
+			)
+		}
+	}
+
 
 	function playGameMusic(){
 		// create an AudioListener and add it to the camera
@@ -293,8 +319,6 @@ The user moves a cube around the board trying to knock balls into a cone
 		light.shadow.camera.far = 500      // default
 		return light;
 	}
-
-
 
 	function createBoxMesh(color){
 		var geometry = new THREE.BoxGeometry( 1, 1, 1);
@@ -424,8 +448,10 @@ The user moves a cube around the board trying to knock balls into a cone
 			gameState.health = 10;
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
+			addMagicBalls(removedMagicBalls);
 			removedBalls = 0;
 			removedFakeBalls = 0;
+			removedMagicBalls = 0;
 			return;
 		}
 
@@ -435,6 +461,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			gameState.health = 10;
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
+			addMagicBalls(removedMagicBalls);
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			return;
@@ -491,9 +518,6 @@ The user moves a cube around the board trying to knock balls into a cone
 		}
 	}
 
-
-
-
 	function updateAvatar(){
 		"change the avatar's linear or angular velocity based on controls state (set by WSAD key presses)"
 
@@ -523,7 +547,6 @@ The user moves a cube around the board trying to knock balls into a cone
 			avatar.__dirtyPosition = true;
 			avatar.position.set(40,10,40);
 		}
-
 	}
 
 	function updateNPC(){
@@ -535,8 +558,6 @@ The user moves a cube around the board trying to knock balls into a cone
 
 		// npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(2));
 	}
-
-
 
 	function animate() {
 
@@ -577,7 +598,6 @@ The user moves a cube around the board trying to knock balls into a cone
 		var info = document.getElementById("info");
 		info.innerHTML='<div style="font-size:24pt">Score: '
 		+ gameState.score
-    	+ ' health: ' + gameState.health
-			+ '</div>';
-
+    + ' health: ' + gameState.health
+		+ '</div>';
 	}
