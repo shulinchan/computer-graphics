@@ -16,7 +16,6 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	var cone;
 
-	var npc;
 	var removedBalls;
 	var removedFakeBalls;
 	var totalBalls;
@@ -25,15 +24,15 @@ The user moves a cube around the board trying to knock balls into a cone
 
 
 	var controls = {fwd:false, bwd:false, left:false, right:false,
-		speed:10, fly:false, reset:false,
+		speed:10, fly:false, reset:false, randomPlace:false,
 		camera:camera}
 
 	var gameState = {score:0, health:10, scene:'main', camera:'none' }
 
 
 	// Here is the main game control
-  init(); //
-  initControls();
+    init(); //
+    initControls();
 	animate();  // start the animation loop!
 
 	function createEndScene(){
@@ -117,7 +116,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		gameState.camera = avatarCam;
 
 		//add balls, everything scales on "totalBalls"
-		totalBalls = 2;
+		totalBalls = 3;
 		magicBalls = 1;
 		removedBalls = 0;
 		removedFakeBalls = 0;
@@ -125,6 +124,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		addBalls(totalBalls);
 		addFakeBalls(totalBalls * 3);
 		addMagicBalls(magicBalls);
+		addObstacles();
 
 		cone = createConeMesh(4,6);
 		cone.position.set(10,3,7);
@@ -135,8 +135,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		npc.addEventListener('collision',function(other_object){
 			if (other_object==avatar){
 				gameState.health--;
-				controls.reset = true;
-				updateAvatar();
+				controls.randomPlace = true;
 			}
 
 			if(gameState.health == 0){
@@ -151,6 +150,10 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	function randN(n){
 		return Math.random()*n;
+	}
+
+	function getRandomArbitrary(min, max) {
+ 		return Math.random() * (max - min) + min;
 	}
 
 	function distanceVector( v1, v2 ){
@@ -242,6 +245,20 @@ The user moves a cube around the board trying to knock balls into a cone
 		}
 	}
 
+	function addObstacles() {
+        for(i=0; i<2; i++) {
+	        var obstacle1 = createWall(0x000000, 10, 3, 1);
+	       	var obstacle2 = createWall(0x696969, 10, 3, 1);
+	        
+	        obstacle1.position.set(getRandomArbitrary(5,40) * 0.9,1,getRandomArbitrary(5,40) * 0.8);
+	        obstacle2.position.set(getRandomArbitrary(15,30) * 0.9,1,getRandomArbitrary(15,35) * 0.8);
+
+	        obstacle2.rotation.set(0, 90, 180);
+
+	        scene.add(obstacle1);
+	        scene.add(obstacle2);
+        }
+    }
 
 	function playGameMusic(){
 		// create an AudioListener and add it to the camera
@@ -335,6 +352,15 @@ The user moves a cube around the board trying to knock balls into a cone
 		mesh.castShadow = true;
 		return mesh;
 	}
+
+	function createWall(color,w,h,d){
+    	var geometry = new THREE.BoxGeometry( w, h, d);
+    	var material = new THREE.MeshLambertMaterial( { color: color} );
+    	mesh = new Physijs.BoxMesh( geometry, material, 0 );
+    	//mesh = new Physijs.BoxMesh( geometry, material,0 );
+    	mesh.castShadow = true;
+    	return mesh;
+  }
 
 
 
@@ -446,6 +472,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		  window.addEventListener( 'keyup',   keyup );
 		}
 
+
 	function keydown(event){
 		console.log("Keydown:"+event.key);
 		//console.dir(event);
@@ -457,6 +484,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
 			addMagicBalls(removedMagicBalls);
+			addObstacles();
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			removedMagicBalls = 0;
@@ -470,6 +498,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
 			addMagicBalls(removedMagicBalls);
+			addObstacles();
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			return;
@@ -555,6 +584,13 @@ The user moves a cube around the board trying to knock balls into a cone
 			avatar.__dirtyPosition = true;
 			avatar.position.set(40,10,40);
 		}
+
+		if (controls.randomPlace){
+			avatar.__dirtyPosition = true;
+			avatar.position.set(getRandomArbitrary(-5,50),1,getRandomArbitrary(-5,50));
+			controls.randomPlace = false;
+		}
+
 	}
 
 	function updateNPC(){
@@ -566,6 +602,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 		// npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(2));
 	}
+
 
 	function animate() {
 
@@ -606,6 +643,6 @@ The user moves a cube around the board trying to knock balls into a cone
 		var info = document.getElementById("info");
 		info.innerHTML='<div style="font-size:24pt">Score: '
 		+ gameState.score
-    + ' health: ' + gameState.health
+    	+ ' health: ' + gameState.health
 		+ '</div>';
 	}
