@@ -130,10 +130,11 @@ The user moves a cube around the board trying to knock balls into a cone
 		cone.position.set(10,3,7);
 		scene.add(cone);
 
-		npc = createBoxMesh2(0x0000ff,1,2,4);
-		npc.position.set(10,20,7);
+		npc = createBoxMesh2(0x0000ff, 1, 2, 4);
+		npc.position.set(-15, 3, 7);
 		npc.addEventListener('collision',function(other_object){
-			if (other_object==avatar){
+			if (other_object == avatar){
+				soundEffect('evil.wav');
 				gameState.health--;
 				controls.randomPlace = true;
 			}
@@ -177,7 +178,7 @@ The user moves a cube around the board trying to knock balls into a cone
 						soundEffect('good.wav');
 						gameState.score += 1;  // add one to the score
 						removedBalls += 1;
-				
+
 					if (gameState.score == totalBalls) {
 						gameState.scene = 'youwon';
 					}
@@ -203,7 +204,7 @@ The user moves a cube around the board trying to knock balls into a cone
 						console.log("Fake ball "+i+" hit the cone");
 						gameState.health -= 1;
 						removedFakeBalls+=1;
-				
+
 						if(gameState.health == 0){
 							gameState.scene = 'lose';
 						}
@@ -230,7 +231,7 @@ The user moves a cube around the board trying to knock balls into a cone
 						console.log("Magic ball "+i+" hit the cone");
 						gameState.health += 5;
 						removedMagicBalls+=1;
-				
+
 						if(gameState.health > totalBalls){
 							gameState.scene = 'youwon';
 						}
@@ -249,7 +250,7 @@ The user moves a cube around the board trying to knock balls into a cone
         for(i=0; i<2; i++) {
 	        var obstacle1 = createWall(0x000000, 10, 3, 1);
 	       	var obstacle2 = createWall(0x696969, 10, 3, 1);
-	        
+
 	        obstacle1.position.set(getRandomArbitrary(5,40) * 0.9,1,getRandomArbitrary(5,40) * 0.8);
 	        obstacle2.position.set(getRandomArbitrary(15,30) * 0.9,1,getRandomArbitrary(15,35) * 0.8);
 
@@ -408,7 +409,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	function createAvatar(){
 		var loader = new THREE.JSONLoader();
-		loader.load("../models/suzanne.json", 
+		loader.load("../models/suzanne.json",
 			function ( geometry, materials ) {
 				console.log("loading suzanne");
 				var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
@@ -596,8 +597,12 @@ The user moves a cube around the board trying to knock balls into a cone
 	function updateNPC(){
 		npc.lookAt(avatar.position);
 	  // npc.__dirtyPosition = true;
-		if (distanceVector(avatar, npc) < 10){
-			npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(2));
+		if (distanceVector(avatar, npc) < 20){
+			npc.material.color.setHex( 0xf44336 );
+			soundEffect('angry.wav');
+			npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(4));
+		} else {
+			npc.material.color.setHex( 0x0000ff );
 		}
 
 		// npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(2));
