@@ -119,13 +119,12 @@ The user moves a cube around the board trying to knock balls into a cone
 
 		//add balls, everything scales on "totalBalls"
 		totalBalls = 3;
-		magicBalls = 1;
 		removedBalls = 0;
 		removedFakeBalls = 0;
 		removedMagicBalls = 0;
 		addBalls(totalBalls);
 		addFakeBalls(totalBalls * 3);
-		addMagicBalls(magicBalls);
+		addMagicBalls(totalBalls/3);
 		
 		var position, position2, position3;
 
@@ -259,6 +258,7 @@ The user moves a cube around the board trying to knock balls into a cone
 						console.log("Magic ball "+i+" hit the cone");
 						gameState.health += 5;
 						removedMagicBalls += 1;
+						console.log("removedFakeBalls" + removedFakeBalls);
 						if(gameState.health > totalBalls){
 							gameState.scene = 'youwon';
 						}
@@ -583,7 +583,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			gameState.health = 10;
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
-			addMagicBalls(removedMagicBalls);
+			//addMagicBalls(removedMagicBalls);
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			removedMagicBalls = 0;
@@ -596,7 +596,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			gameState.health = 10;
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
-			addMagicBalls(removedMagicBalls);
+			//addMagicBalls(removedMagicBalls);
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			removedMagicBalls = 0;
