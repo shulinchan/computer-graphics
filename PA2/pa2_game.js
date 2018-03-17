@@ -19,6 +19,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	var removedBalls;
 	var removedFakeBalls;
+	var removedMagicBalls;
 	var totalBalls;
 
 	var endScene, endCamera, endText;
@@ -231,8 +232,7 @@ The user moves a cube around the board trying to knock balls into a cone
 					if (other_object==cone){
 						console.log("Fake ball "+i+" hit the cone");
 						gameState.health -= 1;
-						removedFakeBalls+=1;
-
+						removedFakeBalls += 1;
 						if(gameState.health == 0){
 							gameState.scene = 'lose';
 						}
@@ -258,8 +258,7 @@ The user moves a cube around the board trying to knock balls into a cone
 					if (other_object==cone){
 						console.log("Magic ball "+i+" hit the cone");
 						gameState.health += 5;
-						removedMagicBalls+=1;
-
+						removedMagicBalls += 1;
 						if(gameState.health > totalBalls){
 							gameState.scene = 'youwon';
 						}
@@ -332,19 +331,19 @@ The user moves a cube around the board trying to knock balls into a cone
 	}
 
 	function addObstacles() {
-        for(i=0; i<2; i++) {
-	        var obstacle1 = createWall(0x000000, 10, 3, 1);
-	       	var obstacle2 = createWall(0x696969, 10, 3, 1);
+    for(i=0; i<2; i++) {
+      var obstacle1 = createWall(0x000000, 10, 3, 1);
+     	var obstacle2 = createWall(0x696969, 10, 3, 1);
 
-	        obstacle1.position.set(getRandomArbitrary(5,40) * 0.9,1,getRandomArbitrary(5,40) * 0.8);
-	        obstacle2.position.set(getRandomArbitrary(15,30) * 0.9,1,getRandomArbitrary(15,35) * 0.8);
+      obstacle1.position.set(getRandomArbitrary(5,40) * 0.9,1,getRandomArbitrary(5,40) * 0.8);
+      obstacle2.position.set(getRandomArbitrary(15,30) * 0.9,1,getRandomArbitrary(15,35) * 0.8);
 
-	        obstacle2.rotation.set(0, 90, 180);
+      obstacle2.rotation.set(0, 90, 180);
 
-	        scene.add(obstacle1);
-	        scene.add(obstacle2);
-        }
+      scene.add(obstacle1);
+      scene.add(obstacle2);
     }
+  }
 
 	function playGameMusic(){
 		// create an AudioListener and add it to the camera
@@ -585,7 +584,6 @@ The user moves a cube around the board trying to knock balls into a cone
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
 			addMagicBalls(removedMagicBalls);
-			addObstacles();
 			removedBalls = 0;
 			removedFakeBalls = 0;
 			removedMagicBalls = 0;
@@ -599,9 +597,9 @@ The user moves a cube around the board trying to knock balls into a cone
 			addBalls(removedBalls);
 			addFakeBalls(removedFakeBalls);
 			addMagicBalls(removedMagicBalls);
-			addObstacles();
 			removedBalls = 0;
 			removedFakeBalls = 0;
+			removedMagicBalls = 0;
 			return;
 		}
 
